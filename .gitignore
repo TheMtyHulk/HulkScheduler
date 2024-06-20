@@ -1,3 +1,5 @@
 venv
 testfiles
 .gitignore
+scheduler.py
+Db architecture
