@@ -1,7 +1,17 @@
-venv
-testfiles
-.gitignore
-.env
-tasks
-Db architecture
 __pycache__
+ignored
+venv
+
+.gitignore
+
+tasks
+
+
+
+
+ignored
+
+
+
+.env
+
