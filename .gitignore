@@ -1,5 +1,7 @@
 venv
 testfiles
 .gitignore
-scheduler.py
+.env
+tasks
 Db architecture
+__pycache__
