@@ -1,7 +1,7 @@
 import sys, getopt
 from scheduler import scheduler
 def main(argv):
-   # default algorithm:
+   # default workers:
    workers = 1
    try:
       opts, args = getopt.getopt(argv,"w:",["workers="])
