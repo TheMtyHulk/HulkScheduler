@@ -1,84 +1,89 @@
 import numpy as np
 
-def initialize_particles(Nt, Nv):
-    """
-    Initializes particles for MCT-PSO.
+def estimate_task_times(num_tasks):
+    return np.random.rand(num_tasks) * 10  # Random estimates between 0 and 10
 
-    Args:
-        Nt (int): Number of tasks.
-        Nv (int): Number of VMs.
-
-    Returns:
-        list: List of particles, each represented as a binary vector.
-    """
-    num_particles = 10  # You can adjust this as needed
-    particles = []
-    for _ in range(num_particles):
-        particle = np.random.randint(2, size=(Nt, Nv))
-        particles.append(particle)
+def initialize_particles(num_particles, num_tasks, num_vms):
+    particles = np.zeros((num_particles, num_tasks, num_vms))
+    for i in range(num_particles):
+        for task_id in range(num_tasks):
+            vm_id = np.random.randint(0, num_vms)
+            particles[i, task_id, vm_id] = 1
     return particles
 
-def calculate_completion_time(particle, T, V):
-    """
-    Calculates the total completion time for a particle.
+def calculate_completion_time(particle, task_times):
+    completion_times = np.sum(particle * task_times[:, None], axis=0)
+    return np.max(completion_times)
 
-    Args:
-        particle (np.ndarray): Binary vector representing task allocation.
-        T (list): Task lengths (execution times) for each task (length Nt).
-        V (list): VMs' execution rates (length Nv).
+def update_particles(particles, velocities, global_best, personal_bests, task_times, w=0.5, c1=1.0, c2=1.5):
+    num_particles = particles.shape[0]
+    for i in range(num_particles):
+        r1, r2 = np.random.rand(), np.random.rand()
+        velocities[i] = w * velocities[i] + c1 * r1 * (personal_bests[i] - particles[i]) + c2 * r2 * (global_best - particles[i])
+        particles[i] += velocities[i]
+        particles[i] = np.clip(particles[i], 0, 1)
+        # Ensure each task is assigned to exactly one VM
+        for task_id in range(particles.shape[1]):
+            assigned_vm = np.argmax(particles[i, task_id])
+            particles[i, task_id] = 0
+            particles[i, task_id, assigned_vm] = 1
+    return particles, velocities
 
-    Returns:
-        float: Total completion time.
-    """
-    execution_times = np.dot(T, particle) / V
-    return np.max(execution_times)  # Assuming maximization problem
+def pso_task_scheduling(num_tasks, task_times, num_vms, num_particles=30, num_iterations=100):
+    particles = initialize_particles(num_particles, num_tasks, num_vms)
+    velocities = np.zeros_like(particles)
+    personal_bests = np.copy(particles)
+    personal_best_times = np.array([calculate_completion_time(p, task_times) for p in personal_bests])
+    global_best = personal_bests[np.argmin(personal_best_times)]
+    global_best_time = np.min(personal_best_times)
 
-def update_velocity(velocity, particle, global_best_particle, w=0.7, c1=1.5, c2=1.5):
-    """
-    Updates the velocity of a particle.
-
-    Args:
-        velocity (np.ndarray): Current velocity.
-        particle (np.ndarray): Current particle.
-        global_best_particle (np.ndarray): Global best particle.
-        w (float): Inertia weight.
-        c1 (float): Cognitive coefficient.
-        c2 (float): Social coefficient.
-
-    Returns:
-        np.ndarray: Updated velocity.
-    """
-    r1, r2 = np.random.rand(), np.random.rand()
-    cognitive_component = c1 * r1 * (particle - particle)
-    social_component = c2 * r2 * (global_best_particle - particle)
-    new_velocity = w * velocity + cognitive_component + social_component
-    return new_velocity
-
-def mct_pso(Nt, T, Nv, V, num_iterations=100):
-    particles = initialize_particles(Nt, Nv)
-    global_best_particle = None
-    global_best_completion_time = float('inf')
-
-    for it in range(num_iterations):
+    for _ in range(num_iterations):
         for i, particle in enumerate(particles):
-            completion_time = calculate_completion_time(particle, T, V)
-            if completion_time < global_best_completion_time:
-                global_best_completion_time = completion_time
-                global_best_particle = particle
+            completion_time = calculate_completion_time(particle, task_times)
+            if completion_time < personal_best_times[i]:
+                personal_bests[i] = particle
+                personal_best_times[i] = completion_time
+                if completion_time < global_best_time:
+                    global_best = particle
+                    global_best_time = completion_time
 
-            # Update velocity and position
-            velocity = np.zeros_like(particle)
-            velocity = update_velocity(velocity, particle, global_best_particle)
-            particle = np.where(velocity > 0, 1, 0)
+        particles, velocities = update_particles(particles, velocities, global_best, personal_bests, task_times)
 
-    return global_best_particle
+    # Convert global_best to the desired output format
+    task_distribution = np.argmax(global_best, axis=1)
+    adjusted_distribution = np.zeros((num_tasks, num_vms), dtype=int)
+    for task_id, vm_id in enumerate(task_distribution):
+        adjusted_distribution[task_id, vm_id] = 1
 
-# Example usage
-Nt = 5
-T = [10, 15, 8,12,20]  # Task lengths (execution times)
-Nv = 3
-V = [2, 3,4]  # VMs' execution rates
+    return adjusted_distribution, global_best_time
 
-allocation_matrix = mct_pso(Nt, T, Nv, V)
-for row in allocation_matrix:
-    print(row)
+def adjust_scheduling(best_distribution, actual_task_times, num_vms):
+    num_tasks = len(actual_task_times)
+    adjusted_distribution, adjusted_time = pso_task_scheduling(num_tasks, actual_task_times, num_vms)
+    return adjusted_distribution, adjusted_time
+
+# Main execution flow
+# num_tasks = 15
+
+num_vms = 5
+
+# estimated_task_times = estimate_task_times(num_tasks)
+
+with open('flength.txt','r') as f:
+    estimated_task_times = np.array([float(line.strip()) for line in f])
+
+
+num_tasks = len(estimated_task_times)
+
+
+
+initial_distribution, initial_time = pso_task_scheduling(num_tasks, estimated_task_times, num_vms)
+
+actual_task_times = np.random.rand(num_tasks) * 8  # Actual times, for example
+
+adjusted_distribution, adjusted_time = adjust_scheduling(initial_distribution, actual_task_times, num_vms)
+
+# Print the adjusted task distribution in the desired format
+for task_assignment in adjusted_distribution:
+    print(task_assignment)
+print("Adjusted Completion Time:", adjusted_time)
