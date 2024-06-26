@@ -1,8 +1,9 @@
 import sys, getopt
-from scheduler import scheduler
+import scheduler 
+
 def main(argv):
    # default algorithm:
-   workers = 1
+   workers = 3
    try:
       opts, args = getopt.getopt(argv,"w:",["workers="])
    except getopt.GetoptError:
@@ -15,7 +16,11 @@ def main(argv):
    print ("Using no of workers: ", workers)
    
    #calling the scheduler class constructor
-   scheduler()
+   s=scheduler.scheduler()
+   s.schedule("tasks")
+   
+   import coordinator
+   coordinator.Coordinator(int(workers))
    
 if __name__ == "__main__":
    main(sys.argv[1:])

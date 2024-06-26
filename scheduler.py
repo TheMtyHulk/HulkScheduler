@@ -8,7 +8,7 @@ class scheduler:
     def __init__(self):
         client = MongoClient(os.getenv('MONGO_URL'))
         self.db = client['taskmaster']
-        self.schedule("tasks")
+        # self.schedule("tasks")
     
     def schedule(self, directory):
         db = self.db
