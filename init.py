@@ -2,8 +2,13 @@ import sys, getopt
 import scheduler 
 
 def main(argv):
+<<<<<<< HEAD
    # default algorithm:
    workers = 3
+=======
+   # default workers:
+   workers = 1
+>>>>>>> 574be95df9cbe54f9c49005fa21e3ff668760080
    try:
       opts, args = getopt.getopt(argv,"w:",["workers="])
    except getopt.GetoptError:
