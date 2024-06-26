@@ -1,9 +1,10 @@
 import threading
 from pymongo import MongoClient
 import os
-import gridfs
+# import gridfs
 from datetime import datetime
 import time
+from compress import CompressPDF
 
 class WorkerThread(threading.Thread):
     
@@ -48,7 +49,12 @@ class WorkerThread(threading.Thread):
         
         for task in mytask:
             tasks.update_one({'_id':task},{'$set':{'started_at':datetime.now()}})  
+            
             print(f"Worker {self.worker_id} is doing task {task}")
+            c=CompressPDF(task_id=task,worker_id=self.worker_id)
+            c.compressPDF()
+            
+            
             tasks.update_one({'_id':task},{'$set':{'completed_at':datetime.now()}})  
         self.assigned_tasks.delete_many({'worker_id':self.worker_id})
         pass

@@ -57,13 +57,6 @@ class Coordinator:
         for ud in undone_tasks:
             assigned_tasks.insert_one({'_id':ud,'worker_id':dist[ud]})
             self.tasks.update_one({'_id':ud},{'$set':{'picked_at':datetime.now()}})   
-        
-
-        # this is for testing purpose only
-            
-        
-        
-        
 
 # this is for testing
 # co=Coordinator(5)
