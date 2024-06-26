@@ -1,10 +1,36 @@
 import numpy as np
+from pymongo import MongoClient
+import os
+
 class Task_Assignment_Calc:
-    def __init__(self,num_tasks, estimated_task_times, num_vms,) -> None:
-        self.num_tasks = num_tasks
-        self.estimated_task_times = estimated_task_times
-        self.num_vms = num_vms
+    def __init__(self,num_vms,undonetasks) -> None:
         
+        self.num_vms = num_vms
+        client = MongoClient(os.getenv('MONGO_URL'))
+        self.db = client['taskmaster']
+        self.tasks=self.db['tasks']
+        files=self.db["fs.files"]
+        
+        self.undonetasks=undonetasks
+        
+        # for task in self.tasks.find({"picked_at": None}):
+        #    self.undonetasks.append(task.get('_id'))
+           
+        self.num_tasks = len(self.undonetasks)
+        
+        estimated_task_times=[]
+        
+        for ud in self.undonetasks:
+            for file in files.find({'_id':ud}):
+                estimated_task_times.append(round(file.get('length')/1024/1024,2))
+                
+        estimated_task_times=np.array(estimated_task_times)
+        
+        initial_distribution, initial_time = self.pso_task_scheduling(self.num_tasks, estimated_task_times, num_vms)
+        actual_task_times = np.random.rand(self.num_tasks) * 8  # Actual times, for example
+        adjusted_distribution, adjusted_time = self.adjust_scheduling(initial_distribution, actual_task_times, num_vms)
+        self.adjusted_distribution=adjusted_distribution        
+        # return adjusted_distribution
   
     def estimate_task_times(self,num_tasks):
         return np.random.rand(num_tasks) * 10  # Random estimates between 0 and 10
@@ -68,28 +94,36 @@ class Task_Assignment_Calc:
         adjusted_distribution, adjusted_time = self.pso_task_scheduling(num_tasks, actual_task_times, num_vms)
         return adjusted_distribution, adjusted_time
 
+    def get_distribution(self):
+        dist = {}
+        distribution = self.adjusted_distribution
+        for task_index, row in enumerate(distribution):
+            for vm_index, assigned in enumerate(row):
+                if assigned == 1:
+                    task_id = self.undonetasks[task_index]
+                    dist[task_id] = vm_index
+                    break  # Move to the next task after finding the assigned VM
+        # print(self.adjusted_distribution)
+        # print(dist)
+        return dist
+        
+
     # Main execution flow
     # num_tasks = 15
 
-num_vms = 5
+# num_vms = 5
 
 # estimated_task_times = estimate_task_times(num_tasks)
 
-with open('flength.txt','r') as f:
-     estimated_task_times = np.array([float(line.strip()) for line in f])
+# num_tasks = len(estimated_task_times)
 
-num_tasks = len(estimated_task_times)
+# T=Task_Assignment_Calc(num_vms=5,)
 
-T=Task_Assignment_Calc()
+# for task_assignment in T.get_distribution():
+    # print(task_assignment)
+# dictofdist,adjusted_dist,undonetasks=T.get_distribution()
 
-initial_distribution, initial_time = T.pso_task_scheduling(num_tasks, estimated_task_times, num_vms)
-
-actual_task_times = np.random.rand(num_tasks) * 8  # Actual times, for example
-
-adjusted_distribution, adjusted_time = T.adjust_scheduling(initial_distribution, actual_task_times, num_vms)
-
-    # Print the adjusted task distribution in the desired format
-T=Task_Assignment_Calc()
-for task_assignment in adjusted_distribution:
-    print(task_assignment)
-print("Adjusted Completion Time:", adjusted_time)
+# print(dictofdist)
+# print(adjusted_dist)
+# print(undonetasks)
+# # print("Adjusted Completion Time:", adjusted_time)

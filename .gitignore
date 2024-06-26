@@ -2,15 +2,11 @@ __pycache__
 ignored
 venv
 
-.gitignore
+
+
+
 
 tasks
-
-
-
-
-ignored
-
 
 
 .env
