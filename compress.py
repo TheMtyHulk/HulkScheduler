@@ -5,7 +5,7 @@ import os
 
 class CompressPDF:
     def __init__(self,task_id,worker_id) -> None:
-        client = pymongo.MongoClient("mongodb://localhost:27017")
+        client = pymongo.MongoClient(os.getenv('MONGO_URL'))
         db = client["taskmaster"]
         fs = GridFS(db)
         self.worker_id=worker_id
