@@ -56,5 +56,6 @@ class WorkerThread(threading.Thread):
             
             
             tasks.update_one({'_id':task},{'$set':{'completed_at':datetime.now()}})  
+            tasks.update_one({'_id':task},{'$set':{'completed_by':self.worker_id}})
         self.assigned_tasks.delete_many({'worker_id':self.worker_id})
         pass

@@ -28,7 +28,7 @@ class scheduler:
 				"picked_at": None,
 				"started_at": None,
 				"completed_at": None,
-				"failed_at": None
+				"completed_by": None
 			})
             
         print("All PDF files have been uploaded to MongoDB and tasks have been scheduled.")

@@ -3,7 +3,7 @@ from pymongo import MongoClient
 import os
 
 class Task_Assignment_Calc:
-    def __init__(self,num_vms,undonetasks) -> None:
+    def __init__(self,num_vms,undonetasks:list) -> None:
         
         self.num_vms = num_vms
         client = MongoClient(os.getenv('MONGO_URL'))
