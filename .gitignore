@@ -4,6 +4,14 @@ venv
 
 
 
+get.py
+diffcalc.py
+
+diff100.txt
+pso100_completed_at.txt
+pso100_picked_at.txt
+pso400_completed_at.txt
+pso400_picked_at.txt
 
 
 

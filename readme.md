@@ -1,4 +1,4 @@
-# optimized task scheduler using PSO-MCT alorithm
+# optimized task scheduler using PSO-MCT alogrithm
 
 
 
