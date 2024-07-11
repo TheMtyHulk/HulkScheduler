@@ -2,7 +2,7 @@
 
 
 
-to run this 
+To Run This Scheduling System
 ```
 git clone https://github.com/TheMtyHulk/HulkScheduler.git
 
@@ -32,4 +32,4 @@ py init.py -w 5
 ```
 here the number 5 determines the number of workers
 
-after it starts you can see worker files in worker_files
+after it starts you can see worker files in worker_files 
