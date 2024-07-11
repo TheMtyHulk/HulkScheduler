@@ -1,4 +1,4 @@
-# optimized task scheduler using PSO-MCT alogrithm
+# optimized task scheduler using PSO-MCT algorithm
 
 
 
@@ -19,7 +19,7 @@ pip install -r requirements.txt
 ```
 create a .env file in the workspace in the .env file
 ```
-MONGO_URL=your mongdb url
+MONGO_URL=your MongoDB URL
 ```
 
 create a folder named "worker_files"
@@ -30,6 +30,6 @@ in your terminal
 ```
 py init.py -w 5
 ```
-here the number 5 determines number of workers
+here the number 5 determines the number of workers
 
 after it starts you can see worker files in worker_files
