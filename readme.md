@@ -17,7 +17,7 @@ cd HulkScheduler
 ```
 pip install -r requirements.txt
 ```
-create a .env file in the workspace in the .env file
+create a .env file in the workspace
 ```
 MONGO_URL=your MongoDB URL
 ```
