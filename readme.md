@@ -17,12 +17,16 @@ cd HulkScheduler
 ```
 pip install -r requirements.txt
 ```
+
 create a .env file in the workspace
 ```
 MONGO_URL=your MongoDB URL
 ```
 
 create a folder named "worker_files"
+```
+mkdir worker_files
+```
 
 to run this 
 in your terminal
